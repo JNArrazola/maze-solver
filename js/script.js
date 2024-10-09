@@ -57,20 +57,30 @@ function selectEntryOrExit(cell) {
 
     if (cell === selectedEntry) {
         cell.classList.remove('entry');
-        selectedEntry = null;
-    } else if (cell === selectedExit) {
+        selectedEntry = null; 
+        cell.style.backgroundColor = 'white'; 
+    } 
+    else if (cell === selectedExit) {
         cell.classList.remove('exit');
-        selectedExit = null;
-    } else if (!selectedEntry) {
+        selectedExit = null; 
+        cell.style.backgroundColor = 'white'; 
+    } 
+    else if (!selectedEntry) {
         cell.classList.add('entry');
-        selectedEntry = cell;
-    } else if (!selectedExit) {
+        selectedEntry = cell; 
+        cell.style.backgroundColor = 'green'; 
+    } 
+    else if (!selectedExit) {
         cell.classList.add('exit');
-        selectedExit = cell;
-    } else {
+        selectedExit = cell; 
+        cell.style.backgroundColor = 'red'; 
+    } 
+    else {
         alert("Ya has seleccionado una entrada y una salida.");
     }
 }
+
+
 
 function toggleWall(cell) {
     if (cell.classList.contains('entry') || cell.classList.contains('exit')) {
@@ -79,10 +89,13 @@ function toggleWall(cell) {
 
     if (cell.classList.contains('wall')) {
         cell.classList.remove('wall');
+        cell.style.backgroundColor = 'white'; 
     } else {
         cell.classList.add('wall');
+        cell.style.backgroundColor = 'black';
     }
 }
+
 
 function updateRandomnessLabel() {
     const randomness = document.getElementById('randomness').value;
@@ -114,7 +127,6 @@ function convertToBinaryMatrix() {
     return binaryMatrix;
 }
 
-// Asynchronous BFS function with delay
 async function solveBFS() {
     if(isAlgorithmRunning) {
         alert("Ya hay un algoritmo en ejecución.");
@@ -144,7 +156,7 @@ async function solveBFS() {
         [0, -1]    // Left
     ];
 
-    const queue = [[entryIndex, []]];  // Cola para BFS (almacena el índice actual y el camino recorrido)
+    const queue = [[entryIndex, []]];
     const visited = new Set();
     visited.add(entryIndex);
     
@@ -364,7 +376,6 @@ async function highlightPath(path) {
         if (!cell.classList.contains('entry') && !cell.classList.contains('exit')) 
             cell.style.backgroundColor = 'lightblue';  
         
-
         await delay(50);  
     }
     isAlgorithmRunning = false;
@@ -388,5 +399,25 @@ function resetCells() {
             cell.style.backgroundColor = 'white'; 
         }
     });
+}
+
+function clearMaze() {
+    const matrixContainer = document.getElementById('matrix-container');
+    const cells = Array.from(matrixContainer.children);
+
+    cells.forEach(cell => {
+        if (cell.classList.contains('entry')) {
+            cell.classList.remove('entry');  
+            cell.style.backgroundColor = 'white'; 
+        } else if (cell.classList.contains('exit')) {
+            cell.classList.remove('exit');   
+            cell.style.backgroundColor = 'white'; 
+        } else if (cell.style.backgroundColor === 'yellow' || cell.style.backgroundColor === 'lightblue') {
+            cell.style.backgroundColor = 'white';  
+        }
+    });
+
+    selectedEntry = null;
+    selectedExit = null;
 }
 
