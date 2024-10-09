@@ -85,3 +85,28 @@ function updateRandomnessLabel() {
     const randomness = document.getElementById('randomness').value;
     document.getElementById('randomnessValue').textContent = `${Math.floor(randomness * 100)}%`;
 }
+
+function convertToBinaryMatrix() {
+    const matrixContainer = document.getElementById('matrix-container');
+    const cells = Array.from(matrixContainer.children);
+    const rows = document.getElementById('rows').value;
+    const cols = document.getElementById('cols').value;
+    
+    let binaryMatrix = [];
+    
+    for (let i = 0; i < rows; i++) {
+        let row = [];
+        for (let j = 0; j < cols; j++) {
+            const cell = cells[i * cols + j];
+            
+            if (cell.classList.contains('wall')) 
+                row.push(1);  
+            else 
+                row.push(0);  
+            
+        }
+        binaryMatrix.push(row);
+    }
+    
+    return binaryMatrix;
+}
