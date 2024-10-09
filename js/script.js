@@ -1,8 +1,12 @@
-let selectedEntry = null;  
-let selectedExit = null;   
-let isAlgorithmRunning = false;
+let selectedEntry;  
+let selectedExit;   
+let isAlgorithmRunning;
 
 function generateAndRandomizeMatrix() {
+    selectedEntry = null;
+    selectedExit = null;
+    isAlgorithmRunning = false;
+
     const rows = document.getElementById('rows').value;
     const cols = document.getElementById('cols').value;
     const randomness = document.getElementById('randomness').value;
@@ -128,23 +132,16 @@ function convertToBinaryMatrix() {
 }
 
 async function solveBFS() {
-    if(isAlgorithmRunning) {
-        alert("Ya hay un algoritmo en ejecución.");
+    if(validateMaze() === false) {
         return;
     }
     
     resetCells();
-    isAlgorithmRunning = true;
 
     const matrixContainer = document.getElementById('matrix-container');
     const cells = Array.from(matrixContainer.children);
     const rows = parseInt(document.getElementById('rows').value);
     const cols = parseInt(document.getElementById('cols').value);
-    
-    if (!selectedEntry || !selectedExit) {
-        alert("Selecciona una entrada y una salida antes de ejecutar BFS.");
-        return;
-    }
 
     const entryIndex = cells.indexOf(selectedEntry);
     const exitIndex = cells.indexOf(selectedExit);
@@ -195,12 +192,9 @@ async function solveBFS() {
 }
 
 async function solveDFS() {
-    if(isAlgorithmRunning) {
-        alert("Ya hay un algoritmo en ejecución.");
+    if(validateMaze() === false) {
         return;
     }
-
-    isAlgorithmRunning = true;
     resetCells();
 
     
@@ -208,11 +202,6 @@ async function solveDFS() {
     const cells = Array.from(matrixContainer.children);
     const rows = parseInt(document.getElementById('rows').value);
     const cols = parseInt(document.getElementById('cols').value);
-    
-    if (!selectedEntry || !selectedExit) {
-        alert("Selecciona una entrada y una salida antes de ejecutar DFS.");
-        return;
-    }
 
     const entryIndex = cells.indexOf(selectedEntry);
     const exitIndex = cells.indexOf(selectedExit);
@@ -262,24 +251,15 @@ async function solveDFS() {
 }
 
 async function solveAStar() {
-    if(isAlgorithmRunning) {
-        alert("Ya hay un algoritmo en ejecución.");
+    if(validateMaze() === false) {
         return;
     }
-
-    isAlgorithmRunning = true;
-    
     resetCells();
 
     const matrixContainer = document.getElementById('matrix-container');
     const cells = Array.from(matrixContainer.children);
     const rows = parseInt(document.getElementById('rows').value);
     const cols = parseInt(document.getElementById('cols').value);
-    
-    if (!selectedEntry || !selectedExit) {
-        alert("Selecciona una entrada y una salida antes de ejecutar A*.");
-        return;
-    }
 
     const entryIndex = cells.indexOf(selectedEntry);
     const exitIndex = cells.indexOf(selectedExit);
@@ -402,6 +382,11 @@ function resetCells() {
 }
 
 function clearMaze() {
+    if(isAlgorithmRunning) {
+        alert("Ya hay un algoritmo en ejecución.");
+        return;
+    }
+    
     const matrixContainer = document.getElementById('matrix-container');
     const cells = Array.from(matrixContainer.children);
 
@@ -419,5 +404,20 @@ function clearMaze() {
 
     selectedEntry = null;
     selectedExit = null;
+}
+
+async function validateMaze() {
+    if(isAlgorithmRunning) {
+        alert("Ya hay un algoritmo en ejecución.");
+        return false;
+    }
+
+    if(!selectedEntry || !selectedExit) {
+        alert("Selecciona una entrada y una salida antes de validar el laberinto.");
+        return false;
+    }
+
+    isAlgorithmRunning = true;
+    return true;
 }
 

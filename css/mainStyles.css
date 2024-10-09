@@ -63,6 +63,9 @@ input[type="range"] {
 }
 
 .algorithm-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra los botones */
     margin-top: 20px;
 }
 
@@ -78,4 +81,12 @@ input[type="range"] {
 
 .algorithm-buttons button:hover {
     background-color: #218838;
+}
+
+#clearButton {
+    background-color: #dc3545; /* Color diferente para el botón de limpiar */
+}
+
+#clearButton:hover {
+    background-color: #c82333; /* Color al pasar el cursor */
 }
