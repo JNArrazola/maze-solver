@@ -53,3 +53,11 @@ button:hover {
 input[type="range"] {
     width: 200px;
 }
+
+.entry {
+    background-color: green;
+}
+
+.exit {
+    background-color: red;
+}
