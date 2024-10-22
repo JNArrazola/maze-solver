@@ -132,7 +132,7 @@ function convertToBinaryMatrix() {
 }
 
 async function solveBFS() {
-    if(validateMaze() === false) {
+    if (validateMaze() === false) {
         return;
     }
     
@@ -156,10 +156,23 @@ async function solveBFS() {
     const queue = [[entryIndex, []]];
     const visited = new Set();
     visited.add(entryIndex);
+
+    let previousNode = null;  
     
     while (queue.length > 0) {
         const [currentIndex, path] = queue.shift();  
-        
+        const currentCell = cells[currentIndex];
+
+        if (previousNode && !previousNode.classList.contains('entry') && !previousNode.classList.contains('exit')) {
+            previousNode.style.backgroundColor = 'yellow';
+        }
+
+        if (!currentCell.classList.contains('entry') && !currentCell.classList.contains('exit')) {
+            currentCell.style.backgroundColor = '#87CEFA';  
+        }
+
+        await delay(100); 
+
         if (currentIndex === exitIndex) {
             await highlightPath(path);
             return;
@@ -178,26 +191,24 @@ async function solveBFS() {
                 if (!visited.has(newIndex) && !nextCell.classList.contains('wall')) {
                     visited.add(newIndex);
                     queue.push([newIndex, [...path, currentIndex]]);
-                    
-                    if(!nextCell.classList.contains('entry') && !nextCell.classList.contains('exit'))
-                        nextCell.style.backgroundColor = 'yellow';
-                    await delay(100);  
                 }
             }
         }
+
+        previousNode = currentCell;
     }
 
     alert("No se encontró un camino.");
     isAlgorithmRunning = false;
 }
 
+
 async function solveDFS() {
-    if(validateMaze() === false) {
+    if (validateMaze() === false) {
         return;
     }
     resetCells();
 
-    
     const matrixContainer = document.getElementById('matrix-container');
     const cells = Array.from(matrixContainer.children);
     const rows = parseInt(document.getElementById('rows').value);
@@ -216,10 +227,23 @@ async function solveDFS() {
     const stack = [[entryIndex, []]];
     const visited = new Set();
     visited.add(entryIndex);
+
+    let previousNode = null;  
     
     while (stack.length > 0) {
         const [currentIndex, path] = stack.pop();
-        
+        const currentCell = cells[currentIndex];
+
+        if (previousNode && !previousNode.classList.contains('entry') && !previousNode.classList.contains('exit')) {
+            previousNode.style.backgroundColor = 'yellow';
+        }
+
+        if (!currentCell.classList.contains('entry') && !currentCell.classList.contains('exit')) {
+            currentCell.style.backgroundColor = '#87CEFA';  
+        }
+
+        await delay(100); 
+
         if (currentIndex === exitIndex) {
             await highlightPath(path);
             return;
@@ -238,20 +262,19 @@ async function solveDFS() {
                 if (!visited.has(newIndex) && !nextCell.classList.contains('wall')) {
                     visited.add(newIndex);
                     stack.push([newIndex, [...path, currentIndex]]);
-                    
-                    if(!nextCell.classList.contains('entry') && !nextCell.classList.contains('exit'))
-                        nextCell.style.backgroundColor = 'yellow';
-                    await delay(100);
                 }
             }
         }
+
+        previousNode = currentCell;
     }
 
     alert("No se encontró un camino.");
 }
 
+
 async function solveAStar() {
-    if(validateMaze() === false) {
+    if (validateMaze() === false) {
         return;
     }
     resetCells();
@@ -280,10 +303,22 @@ async function solveAStar() {
     gScore[entryIndex] = 0;
 
     const visited = new Set();
+    let previousNode = null;  
     
     while (!openSet.isEmpty()) {
         const [currentIndex, path] = openSet.dequeue();
-        
+        const currentCell = cells[currentIndex];
+
+        if (previousNode && !previousNode.classList.contains('entry') && !previousNode.classList.contains('exit')) {
+            previousNode.style.backgroundColor = 'yellow';
+        }
+
+        if (!currentCell.classList.contains('entry') && !currentCell.classList.contains('exit')) {
+            currentCell.style.backgroundColor = '#87CEFA';  
+        }
+
+        await delay(100);
+
         if (currentIndex === exitIndex) {
             await highlightPath(path);
             return;
@@ -308,19 +343,18 @@ async function solveAStar() {
                         gScore[newIndex] = tentativeGScore;
                         const fScore = tentativeGScore + manhattanDistance(newRow, newCol, exitRow, exitCol);
                         openSet.enqueue([newIndex, [...path, currentIndex]], fScore);
-
-                        if(!nextCell.classList.contains('entry') && !nextCell.classList.contains('exit')) 
-                            nextCell.style.backgroundColor = 'yellow';
-                        await delay(100);
                     }
                 }
             }
         }
+
+        previousNode = currentCell;
     }
 
     alert("No se encontró un camino.");
     isAlgorithmRunning = false;
 }
+
 
 function manhattanDistance(x1, y1, x2, y2) {
     return Math.abs(x1 - x2) + Math.abs(y1 - y2);
@@ -407,10 +441,9 @@ function clearMaze() {
 }
 
 async function validateMaze() {
-    if(isAlgorithmRunning) {
-        alert("Ya hay un algoritmo en ejecución.");
+    if(isAlgorithmRunning) 
         return false;
-    }
+    
 
     if(!selectedEntry || !selectedExit) {
         alert("Selecciona una entrada y una salida antes de validar el laberinto.");
