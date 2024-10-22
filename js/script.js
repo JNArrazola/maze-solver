@@ -132,11 +132,19 @@ function convertToBinaryMatrix() {
 }
 
 async function solveBFS() {
+    if(isAlgorithmRunning) {
+        alert("Ya hay un algoritmo en ejecución.");
+        return;
+    }
+
+    
     if (validateMaze() === false) {
         return;
     }
     
     resetCells();
+
+    isAlgorithmRunning = true;
 
     const matrixContainer = document.getElementById('matrix-container');
     const cells = Array.from(matrixContainer.children);
@@ -204,9 +212,16 @@ async function solveBFS() {
 
 
 async function solveDFS() {
+    if(isAlgorithmRunning) {
+        alert("Ya hay un algoritmo en ejecución.");
+        return;
+    }
+    
     if (validateMaze() === false) {
         return;
     }
+
+    isAlgorithmRunning = true;
     resetCells();
 
     const matrixContainer = document.getElementById('matrix-container');
@@ -274,9 +289,16 @@ async function solveDFS() {
 
 
 async function solveAStar() {
+    if(isAlgorithmRunning) {
+        alert("Ya hay un algoritmo en ejecución.");
+        return;
+    }
+
     if (validateMaze() === false) {
         return;
     }
+
+    isAlgorithmRunning = true;
     resetCells();
 
     const matrixContainer = document.getElementById('matrix-container');
