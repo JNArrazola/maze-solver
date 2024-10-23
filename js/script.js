@@ -1,6 +1,7 @@
 let selectedEntry;  
 let selectedExit;   
 let isAlgorithmRunning;
+let cellsMatrix = []; 
 
 function generateAndRandomizeMatrix() {
     selectedEntry = null;
@@ -19,36 +20,40 @@ function generateAndRandomizeMatrix() {
     matrixContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
     matrixContainer.style.gridAutoRows = '30px';
     
-    const totalCells = rows * cols;
-    const wallsCount = Math.floor(totalCells * randomness); 
+    cellsMatrix = Array.from({ length: rows }, () => Array(cols).fill(null)); 
 
-    const cells = [];
-    for (let i = 0; i < totalCells; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('cell');
-        cells.push(cell);
-        matrixContainer.appendChild(cell);
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cellsMatrix[i][j] = cell; 
+            matrixContainer.appendChild(cell);
 
-        cell.addEventListener('click', (event) => {
-            if (event.button === 0) { 
-                selectEntryOrExit(cell);
-            }
-        });
+            cell.addEventListener('click', (event) => {
+                if (event.button === 0) { 
+                    selectEntryOrExit(cell);
+                }
+            });
 
-        cell.addEventListener('contextmenu', (event) => {
-            event.preventDefault(); 
-            toggleWall(cell);
-        });
+            cell.addEventListener('contextmenu', (event) => {
+                event.preventDefault(); 
+                toggleWall(cell);
+            });
+        }
     }
 
-    for (let i = 0; i < wallsCount; i++) {
-        const randomIndex = Math.floor(Math.random() * totalCells);
+    const totalCells = rows * cols;
+    const wallsCount = Math.floor(totalCells * randomness);
 
-        if (cells[randomIndex].classList.contains('wall')) {
+    for (let i = 0; i < wallsCount; i++) {
+        const randomRow = Math.floor(Math.random() * rows);
+        const randomCol = Math.floor(Math.random() * cols);
+
+        if (cellsMatrix[randomRow][randomCol].classList.contains('wall')) {
             i--;
             continue;
         }
-        cells[randomIndex].classList.add('wall');
+        cellsMatrix[randomRow][randomCol].classList.add('wall');
     }
 
     document.getElementById('algorithm-buttons').style.display = 'block';
@@ -84,8 +89,6 @@ function selectEntryOrExit(cell) {
     }
 }
 
-
-
 function toggleWall(cell) {
     if (cell.classList.contains('entry') || cell.classList.contains('exit')) {
         return; 
@@ -100,15 +103,12 @@ function toggleWall(cell) {
     }
 }
 
-
 function updateRandomnessLabel() {
     const randomness = document.getElementById('randomness').value;
     document.getElementById('randomnessValue').textContent = `${Math.floor(randomness * 100)}%`;
 }
 
 function convertToBinaryMatrix() {
-    const matrixContainer = document.getElementById('matrix-container');
-    const cells = Array.from(matrixContainer.children);
     const rows = document.getElementById('rows').value;
     const cols = document.getElementById('cols').value;
     
@@ -117,13 +117,12 @@ function convertToBinaryMatrix() {
     for (let i = 0; i < rows; i++) {
         let row = [];
         for (let j = 0; j < cols; j++) {
-            const cell = cells[i * cols + j];
+            const cell = cellsMatrix[i][j];
             
             if (cell.classList.contains('wall')) 
                 row.push(1);  
             else 
                 row.push(0);  
-            
         }
         binaryMatrix.push(row);
     }
@@ -150,14 +149,22 @@ async function solveBFS() {
 
     isAlgorithmRunning = true;
 
-    const matrixContainer = document.getElementById('matrix-container');
-    const cells = Array.from(matrixContainer.children);
     const rows = parseInt(document.getElementById('rows').value);
     const cols = parseInt(document.getElementById('cols').value);
 
-    const entryIndex = cells.indexOf(selectedEntry);
-    const exitIndex = cells.indexOf(selectedExit);
+    let entryPosition, exitPosition;
     
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (cellsMatrix[i][j] === selectedEntry) {
+                entryPosition = [i, j];
+            }
+            if (cellsMatrix[i][j] === selectedExit) {
+                exitPosition = [i, j];
+            }
+        }
+    }
+
     const directions = [
         [0, 1],    // Right
         [1, 0],    // Down
@@ -165,15 +172,15 @@ async function solveBFS() {
         [0, -1]    // Left
     ];
 
-    const queue = [[entryIndex, []]];
+    const queue = [[entryPosition, []]];
     const visited = new Set();
-    visited.add(entryIndex);
+    visited.add(entryPosition.toString());
 
     let previousNode = null;  
     
     while (queue.length > 0) {
-        const [currentIndex, path] = queue.shift();  
-        const currentCell = cells[currentIndex];
+        const [[currentRow, currentCol], path] = queue.shift();  
+        const currentCell = cellsMatrix[currentRow][currentCol];
 
         if (previousNode && !previousNode.classList.contains('entry') && !previousNode.classList.contains('exit')) {
             previousNode.style.backgroundColor = 'yellow';
@@ -185,24 +192,21 @@ async function solveBFS() {
 
         await delay(100); 
 
-        if (currentIndex === exitIndex) {
+        if (currentRow === exitPosition[0] && currentCol === exitPosition[1]) {
             await highlightPath(path);
             return;
         }
         
         for (let [dx, dy] of directions) {
-            const currentRow = Math.floor(currentIndex / cols);
-            const currentCol = currentIndex % cols;
             const newRow = currentRow + dx;
             const newCol = currentCol + dy;
-            const newIndex = newRow * cols + newCol;
 
             if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
-                const nextCell = cells[newIndex];
+                const nextCell = cellsMatrix[newRow][newCol];
 
-                if (!visited.has(newIndex) && !nextCell.classList.contains('wall')) {
-                    visited.add(newIndex);
-                    queue.push([newIndex, [...path, currentIndex]]);
+                if (!visited.has([newRow, newCol].toString()) && !nextCell.classList.contains('wall')) {
+                    visited.add([newRow, newCol].toString());
+                    queue.push([[newRow, newCol], [...path, [currentRow, currentCol]]]);
                 }
             }
         }
@@ -210,13 +214,12 @@ async function solveBFS() {
         previousNode = currentCell;
     }
 
-    if(previousNode) 
+    if (previousNode) 
         previousNode.style.backgroundColor = 'yellow';
 
     isAlgorithmRunning = false;
     alert("No se encontró un camino.");
 }
-
 
 async function solveDFS() {
     if(isAlgorithmRunning) {
@@ -236,14 +239,22 @@ async function solveDFS() {
     isAlgorithmRunning = true;
     resetCells();
 
-    const matrixContainer = document.getElementById('matrix-container');
-    const cells = Array.from(matrixContainer.children);
     const rows = parseInt(document.getElementById('rows').value);
     const cols = parseInt(document.getElementById('cols').value);
 
-    const entryIndex = cells.indexOf(selectedEntry);
-    const exitIndex = cells.indexOf(selectedExit);
+    let entryPosition, exitPosition;
     
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (cellsMatrix[i][j] === selectedEntry) {
+                entryPosition = [i, j];
+            }
+            if (cellsMatrix[i][j] === selectedExit) {
+                exitPosition = [i, j];
+            }
+        }
+    }
+
     const directions = [
         [0, 1],    // Right
         [1, 0],    // Down
@@ -251,15 +262,15 @@ async function solveDFS() {
         [0, -1]    // Left
     ];
 
-    const stack = [[entryIndex, []]];
+    const stack = [[entryPosition, []]];
     const visited = new Set();
-    visited.add(entryIndex);
+    visited.add(entryPosition.toString());
 
     let previousNode = null;  
     
     while (stack.length > 0) {
-        const [currentIndex, path] = stack.pop();
-        const currentCell = cells[currentIndex];
+        const [[currentRow, currentCol], path] = stack.pop();  
+        const currentCell = cellsMatrix[currentRow][currentCol];
 
         if (previousNode && !previousNode.classList.contains('entry') && !previousNode.classList.contains('exit')) {
             previousNode.style.backgroundColor = 'yellow';
@@ -271,24 +282,21 @@ async function solveDFS() {
 
         await delay(100); 
 
-        if (currentIndex === exitIndex) {
+        if (currentRow === exitPosition[0] && currentCol === exitPosition[1]) {
             await highlightPath(path);
             return;
         }
-
+        
         for (let [dx, dy] of directions) {
-            const currentRow = Math.floor(currentIndex / cols);
-            const currentCol = currentIndex % cols;
             const newRow = currentRow + dx;
             const newCol = currentCol + dy;
-            const newIndex = newRow * cols + newCol;
 
             if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
-                const nextCell = cells[newIndex];
+                const nextCell = cellsMatrix[newRow][newCol];
 
-                if (!visited.has(newIndex) && !nextCell.classList.contains('wall')) {
-                    visited.add(newIndex);
-                    stack.push([newIndex, [...path, currentIndex]]);
+                if (!visited.has([newRow, newCol].toString()) && !nextCell.classList.contains('wall')) {
+                    visited.add([newRow, newCol].toString());
+                    stack.push([[newRow, newCol], [...path, [currentRow, currentCol]]]);
                 }
             }
         }
@@ -296,12 +304,11 @@ async function solveDFS() {
         previousNode = currentCell;
     }
 
-    if(previousNode) 
+    if (previousNode) 
         previousNode.style.backgroundColor = 'yellow';
     isAlgorithmRunning = false;
     alert("No se encontró un camino.");
 }
-
 
 async function solveAStar() {
     if(isAlgorithmRunning) {
@@ -321,15 +328,21 @@ async function solveAStar() {
     isAlgorithmRunning = true;
     resetCells();
 
-    const matrixContainer = document.getElementById('matrix-container');
-    const cells = Array.from(matrixContainer.children);
     const rows = parseInt(document.getElementById('rows').value);
     const cols = parseInt(document.getElementById('cols').value);
 
-    const entryIndex = cells.indexOf(selectedEntry);
-    const exitIndex = cells.indexOf(selectedExit);
-    const exitRow = Math.floor(exitIndex / cols);
-    const exitCol = exitIndex % cols;
+    let entryPosition, exitPosition;
+    
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (cellsMatrix[i][j] === selectedEntry) {
+                entryPosition = [i, j];
+            }
+            if (cellsMatrix[i][j] === selectedExit) {
+                exitPosition = [i, j];
+            }
+        }
+    }
 
     const directions = [
         [0, 1],    // Right
@@ -339,17 +352,17 @@ async function solveAStar() {
     ];
 
     const openSet = new PriorityQueue();
-    openSet.enqueue([entryIndex, []], 0);
+    openSet.enqueue([entryPosition, []], 0);
 
-    const gScore = Array(rows * cols).fill(Infinity);
-    gScore[entryIndex] = 0;
+    const gScore = Array(rows).fill(null).map(() => Array(cols).fill(Infinity));
+    gScore[entryPosition[0]][entryPosition[1]] = 0;
 
     const visited = new Set();
     let previousNode = null;  
     
     while (!openSet.isEmpty()) {
-        const [currentIndex, path] = openSet.dequeue();
-        const currentCell = cells[currentIndex];
+        const [[currentRow, currentCol], path] = openSet.dequeue();
+        const currentCell = cellsMatrix[currentRow][currentCol];
 
         if (previousNode && !previousNode.classList.contains('entry') && !previousNode.classList.contains('exit')) {
             previousNode.style.backgroundColor = 'yellow';
@@ -361,30 +374,27 @@ async function solveAStar() {
 
         await delay(100);
 
-        if (currentIndex === exitIndex) {
+        if (currentRow === exitPosition[0] && currentCol === exitPosition[1]) {
             await highlightPath(path);
             return;
         }
 
-        visited.add(currentIndex);
+        visited.add([currentRow, currentCol].toString());
 
         for (let [dx, dy] of directions) {
-            const currentRow = Math.floor(currentIndex / cols);
-            const currentCol = currentIndex % cols;
             const newRow = currentRow + dx;
             const newCol = currentCol + dy;
-            const newIndex = newRow * cols + newCol;
 
             if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
-                const nextCell = cells[newIndex];
+                const nextCell = cellsMatrix[newRow][newCol];
 
-                if (!visited.has(newIndex) && !nextCell.classList.contains('wall')) {
-                    const tentativeGScore = gScore[currentIndex] + 1;
+                if (!visited.has([newRow, newCol].toString()) && !nextCell.classList.contains('wall')) {
+                    const tentativeGScore = gScore[currentRow][currentCol] + 1;
 
-                    if (tentativeGScore < gScore[newIndex]) {
-                        gScore[newIndex] = tentativeGScore;
-                        const fScore = tentativeGScore + manhattanDistance(newRow, newCol, exitRow, exitCol);
-                        openSet.enqueue([newIndex, [...path, currentIndex]], fScore);
+                    if (tentativeGScore < gScore[newRow][newCol]) {
+                        gScore[newRow][newCol] = tentativeGScore;
+                        const fScore = tentativeGScore + manhattanDistance(newRow, newCol, exitPosition[0], exitPosition[1]);
+                        openSet.enqueue([[newRow, newCol], [...path, [currentRow, currentCol]]], fScore);
                     }
                 }
             }
@@ -393,12 +403,11 @@ async function solveAStar() {
         previousNode = currentCell;
     }
 
-    if(previousNode) 
+    if (previousNode) 
         previousNode.style.backgroundColor = 'yellow';
     alert("No se encontró un camino.");
     isAlgorithmRunning = false;
 }
-
 
 function manhattanDistance(x1, y1, x2, y2) {
     return Math.abs(x1 - x2) + Math.abs(y1 - y2);
@@ -423,13 +432,11 @@ class PriorityQueue {
     }
 }
 
-
 async function highlightPath(path) {
     const matrixContainer = document.getElementById('matrix-container');
-    const cells = Array.from(matrixContainer.children);
 
-    for (let index of path) {
-        const cell = cells[index];
+    for (let [row, col] of path) {
+        const cell = cellsMatrix[row][col];
         
         if (!cell.classList.contains('entry') && !cell.classList.contains('exit')) 
             cell.style.backgroundColor = 'lightblue';  
@@ -439,24 +446,22 @@ async function highlightPath(path) {
     isAlgorithmRunning = false;
 }
 
-
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function resetCells() {
-    const matrixContainer = document.getElementById('matrix-container');
-    const cells = Array.from(matrixContainer.children);
-    
-    cells.forEach(cell => {
-        if (cell.classList.contains('entry')) {
-            cell.style.backgroundColor = 'green'; 
-        } else if (cell.classList.contains('exit')) {
-            cell.style.backgroundColor = 'red';   
-        } else if (cell.style.backgroundColor === 'yellow' || cell.style.backgroundColor === 'lightblue') {
-            cell.style.backgroundColor = 'white'; 
+    for (let row of cellsMatrix) {
+        for (let cell of row) {
+            if (cell.classList.contains('entry')) {
+                cell.style.backgroundColor = 'green'; 
+            } else if (cell.classList.contains('exit')) {
+                cell.style.backgroundColor = 'red';   
+            } else if (cell.style.backgroundColor === 'yellow' || cell.style.backgroundColor === 'lightblue') {
+                cell.style.backgroundColor = 'white'; 
+            }
         }
-    });
+    }
 }
 
 function clearMaze() {
@@ -464,21 +469,20 @@ function clearMaze() {
         alert("Ya hay un algoritmo en ejecución.");
         return;
     }
-    
-    const matrixContainer = document.getElementById('matrix-container');
-    const cells = Array.from(matrixContainer.children);
 
-    cells.forEach(cell => {
-        if (cell.classList.contains('entry')) {
-            cell.classList.remove('entry');  
-            cell.style.backgroundColor = 'white'; 
-        } else if (cell.classList.contains('exit')) {
-            cell.classList.remove('exit');   
-            cell.style.backgroundColor = 'white'; 
-        } else if (cell.style.backgroundColor === 'yellow' || cell.style.backgroundColor === 'lightblue') {
-            cell.style.backgroundColor = 'white';  
+    for (let row of cellsMatrix) {
+        for (let cell of row) {
+            if (cell.classList.contains('entry')) {
+                cell.classList.remove('entry');  
+                cell.style.backgroundColor = 'white'; 
+            } else if (cell.classList.contains('exit')) {
+                cell.classList.remove('exit');   
+                cell.style.backgroundColor = 'white'; 
+            } else if (cell.style.backgroundColor === 'yellow' || cell.style.backgroundColor === 'lightblue') {
+                cell.style.backgroundColor = 'white';  
+            }
         }
-    });
+    }
 
     selectedEntry = null;
     selectedExit = null;
@@ -497,4 +501,3 @@ async function validateMaze() {
     isAlgorithmRunning = true;
     return true;
 }
-
