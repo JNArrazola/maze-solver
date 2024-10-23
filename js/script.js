@@ -137,6 +137,10 @@ async function solveBFS() {
         return;
     }
 
+    if(!selectedEntry || !selectedExit) {
+        alert("Selecciona una entrada y una salida antes de validar el laberinto.");
+        return false;
+    }
     
     if (validateMaze() === false) {
         return;
@@ -176,7 +180,7 @@ async function solveBFS() {
         }
 
         if (!currentCell.classList.contains('entry') && !currentCell.classList.contains('exit')) {
-            currentCell.style.backgroundColor = '#87CEFA';  
+            currentCell.style.backgroundColor = "#f58c24";  
         }
 
         await delay(100); 
@@ -206,8 +210,11 @@ async function solveBFS() {
         previousNode = currentCell;
     }
 
-    alert("No se encontró un camino.");
+    if(previousNode) 
+        previousNode.style.backgroundColor = 'yellow';
+
     isAlgorithmRunning = false;
+    alert("No se encontró un camino.");
 }
 
 
@@ -217,6 +224,11 @@ async function solveDFS() {
         return;
     }
     
+    if(!selectedEntry || !selectedExit) {
+        alert("Selecciona una entrada y una salida antes de validar el laberinto.");
+        return false;
+    }
+
     if (validateMaze() === false) {
         return;
     }
@@ -254,7 +266,7 @@ async function solveDFS() {
         }
 
         if (!currentCell.classList.contains('entry') && !currentCell.classList.contains('exit')) {
-            currentCell.style.backgroundColor = '#87CEFA';  
+            currentCell.style.backgroundColor = "#f58c24";  
         }
 
         await delay(100); 
@@ -284,6 +296,9 @@ async function solveDFS() {
         previousNode = currentCell;
     }
 
+    if(previousNode) 
+        previousNode.style.backgroundColor = 'yellow';
+    isAlgorithmRunning = false;
     alert("No se encontró un camino.");
 }
 
@@ -292,6 +307,11 @@ async function solveAStar() {
     if(isAlgorithmRunning) {
         alert("Ya hay un algoritmo en ejecución.");
         return;
+    }
+
+    if(!selectedEntry || !selectedExit) {
+        alert("Selecciona una entrada y una salida antes de validar el laberinto.");
+        return false;
     }
 
     if (validateMaze() === false) {
@@ -336,7 +356,7 @@ async function solveAStar() {
         }
 
         if (!currentCell.classList.contains('entry') && !currentCell.classList.contains('exit')) {
-            currentCell.style.backgroundColor = '#87CEFA';  
+            currentCell.style.backgroundColor = "#f58c24";  
         }
 
         await delay(100);
@@ -373,6 +393,8 @@ async function solveAStar() {
         previousNode = currentCell;
     }
 
+    if(previousNode) 
+        previousNode.style.backgroundColor = 'yellow';
     alert("No se encontró un camino.");
     isAlgorithmRunning = false;
 }
