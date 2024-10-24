@@ -10,6 +10,7 @@ function generateAndRandomizeMatrix() {
 
     const rows = document.getElementById('rows').value;
     const cols = document.getElementById('cols').value;
+
     const randomness = document.getElementById('randomness').value;
     const matrixContainer = document.getElementById('matrix-container');
     
@@ -19,7 +20,7 @@ function generateAndRandomizeMatrix() {
 
     matrixContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
     matrixContainer.style.gridAutoRows = '30px';
-    
+
     cellsMatrix = Array.from({ length: rows }, () => Array(cols).fill(null)); 
 
     for (let i = 0; i < rows; i++) {
@@ -111,7 +112,7 @@ function updateRandomnessLabel() {
 function convertToBinaryMatrix() {
     const rows = document.getElementById('rows').value;
     const cols = document.getElementById('cols').value;
-    
+
     let binaryMatrix = [];
     
     for (let i = 0; i < rows; i++) {
