@@ -4,8 +4,8 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    height: 100vh;
-    margin: 0;
+    /*height: 100vh;*/
+    margin: 2em;
     background-color: #f0f0f0;
 }
 
@@ -13,25 +13,25 @@ body {
     text-align: center;
 }
 
-.controls {
-    margin-bottom: 20px;
-}
+/*.controls {
+ *    margin-bottom: 20px;
+ * }*/
 
 .grid {
     display: grid;
     gap: 1px;
-    margin-top: 20px;
-    justify-content: center; 
+    margin-top: 2em;
+    justify-content: center;
     align-content: center;
-    max-width: 100%;  
-    max-height: 80vh; 
-    overflow: auto;   
+    /*max-width: 100%;
+     *    max-height: 80vh;*/
+    /*overflow: auto;*/
 }
 
 
 .cell {
-    width: 30px;
-    height: 30px;
+    width: 2em;
+    height: 2em;
     border: 1px solid #ddd;
     background-color: white;
 }
@@ -88,9 +88,9 @@ input[type="range"] {
 }
 
 #clearButton {
-    background-color: #dc3545; /* Color diferente para el botón de limpiar */
+background-color: #dc3545; /* Color diferente para el botón de limpiar */
 }
 
 #clearButton:hover {
-    background-color: #c82333; /* Color al pasar el cursor */
+background-color: #c82333; /* Color al pasar el cursor */
 }
